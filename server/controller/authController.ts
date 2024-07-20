@@ -4,13 +4,15 @@ import bcrypt from "bcrypt";
 import jwt, { VerifyErrors } from "jsonwebtoken";
 import asyncHandler from "express-async-handler";
 
+import generateRefreshToken from "../utils/generateRefreshToken";
+
 // @desc Register
 // @route POST /auth
 // @access Public
 
 const register = asyncHandler(
 	async (req: Request, res: Response): Promise<void> => {
-		const { username, password } = req.body;
+		const { username, password, role } = req.body;
 
 		// Input Validation
 		if (!username || !password) {
@@ -30,6 +32,7 @@ const register = asyncHandler(
 		const newUser = new User({
 			username,
 			password: hashedPassword,
+			role,
 		});
 
 		await newUser.save();
@@ -42,22 +45,10 @@ const register = asyncHandler(
 				},
 			},
 			process.env.ACCESS_TOKEN_SECRET as string,
-			{ expiresIn: "15m" }
+			{ expiresIn: "30m" }
 		);
 
-		const refreshToken = jwt.sign(
-			{ username: newUser.username },
-			process.env.REFRESH_TOKEN_SECRET as string,
-			{ expiresIn: "7d" }
-		);
-
-		// Create secure cookie with refresh token
-		res.cookie("jwt", refreshToken, {
-			httpOnly: true,
-			secure: true,
-			sameSite: "none",
-			maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-		});
+		generateRefreshToken(res, { username: newUser.username });
 
 		res.status(201).json({
 			accessToken,
@@ -102,22 +93,10 @@ const login = asyncHandler(
 				},
 			},
 			process.env.ACCESS_TOKEN_SECRET as string,
-			{ expiresIn: "15m" }
+			{ expiresIn: "30m" }
 		);
 
-		const refreshToken = jwt.sign(
-			{ username: foundUser.username },
-			process.env.REFRESH_TOKEN_SECRET as string,
-			{ expiresIn: "7d" }
-		);
-
-		// Create secure cookie with refresh token
-		res.cookie("jwt", refreshToken, {
-			httpOnly: true, //accessible only by web server
-			secure: true, //https
-			sameSite: "none", //cross-site cookie
-			maxAge: 7 * 24 * 60 * 60 * 1000, //cookie expiry: set to match rT
-		});
+		generateRefreshToken(res, { username: foundUser.username });
 
 		// Send accessToken containing username and roles
 		res.json({ accessToken });
@@ -159,11 +138,11 @@ const refresh = asyncHandler(
 					{
 						UserInfo: {
 							username: foundUser.username,
-							roles: foundUser.role,
+							role: foundUser.role,
 						},
 					},
 					process.env.ACCESS_TOKEN_SECRET as string,
-					{ expiresIn: "15m" }
+					{ expiresIn: "30m" }
 				);
 
 				res.json({ accessToken });

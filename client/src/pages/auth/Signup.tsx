@@ -1,20 +1,23 @@
-import { useState, useEffect, FormEvent } from "react";
+import { useState, FormEvent } from "react";
 import { IoEyeOutline, IoEyeOffOutline } from "react-icons/io5";
 import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 
-import { InputField } from "../components/ui/InputField";
-import { setCredentials } from "../features/auth/authSlice";
-import { useLoginMutation } from "../features/auth/authApiSlice";
+import { InputField } from "../../components/ui/InputField";
+import { setCredentials } from "../../features/auth/authSlice";
+import { useRegisterMutation } from "../../features/auth/authApiSlice";
+import usePersist from "../../hooks/usePersist";
 
-const Login = () => {
+const Signup = () => {
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
+	const [showPassword, setShowPassword] = useState(false);
+	const [persist, setPersist] = usePersist();
 
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
 
-	const [login, { isLoading }] = useLoginMutation();
+	const [register, { isLoading }] = useRegisterMutation();
 
 	const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setUsername(e.target.value);
@@ -27,11 +30,12 @@ const Login = () => {
 	const handleSubmit = async (e: FormEvent) => {
 		e.preventDefault();
 		try {
-			const { accessToken } = await login({ username, password }).unwrap();
+			const { accessToken } = await register({ username, password }).unwrap();
 			dispatch(setCredentials({ accessToken }));
 			setUsername("");
 			setPassword("");
 			navigate("/dashboard");
+			alert("User created");
 		} catch (err: any) {
 			if (!err.status) {
 				alert("No Server Response");
@@ -45,10 +49,7 @@ const Login = () => {
 		}
 	};
 
-	useEffect(() => {
-		console.log(username);
-		console.log(password);
-	}, [username, password]);
+	// const handlePersist = () => setPersist((prev) => !prev);
 
 	return (
 		<>
@@ -63,7 +64,7 @@ const Login = () => {
 				<form className="flex-1 h-full" onSubmit={handleSubmit}>
 					<div className="flex min-h-full flex-col py-12 lg:px-10 justify-center items-center gap-2">
 						<h2 className="mt-10 text-2xl font-bold text-slate-500">
-							Sign in to your account
+							Create an account
 						</h2>
 
 						<InputField
@@ -86,7 +87,7 @@ const Login = () => {
 									<input
 										id="password"
 										name="password"
-										type="text"
+										type={showPassword ? "password" : "text"}
 										required
 										value={password}
 										onChange={handlePasswordChange}
@@ -96,36 +97,44 @@ const Login = () => {
 										type="button"
 										id="togglePassword"
 										className="focus:outline-none h-full p-1"
+										onClick={() => {
+											setShowPassword(!showPassword);
+										}}
 									>
-										<IoEyeOutline size={20} />
+										{showPassword ? (
+											<IoEyeOutline size={20} />
+										) : (
+											<IoEyeOffOutline size={20} />
+										)}
 									</button>
 								</div>
 							</div>
 						</div>
 
-						<div className="flex items-center justify-between w-full sm:max-w-[400px] lg:min-w-[400px] mb-1">
+						{/* <div className="flex items-center justify-between w-full sm:max-w-[400px] lg:min-w-[400px] mb-1">
 							<div className="flex items-center justify-center gap-1">
 								<input
 									type="checkbox"
-									value=""
+									onChange={handlePersist}
+									checked={persist}
 									className="w-3 h-3 text-blue-600 bg-gray-100 border-gray-300 rounded"
 								/>
 								<label className="text-sm font-medium">Remember me</label>
 							</div>
 
 							<p className="text-sm font-medium">Forgot password?</p>
-						</div>
+						</div> */}
 
 						<button
 							type="submit"
 							className="text-white w-full max-w-[400px] bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-md text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
 						>
-							Login
+							Signup
 						</button>
 
 						<div className="w-full sm:max-w-[400px] lg:min-w-[400px] mt-2">
 							<p className="text-sm flex justify-center">
-								Don't have an account? &nbsp; <a href="">Sign up</a>
+								Already have an account? &nbsp; <Link to="/login">Sign in</Link>
 							</p>
 						</div>
 
@@ -142,4 +151,4 @@ const Login = () => {
 	);
 };
 
-export default Login;
+export default Signup;
