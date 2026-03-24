@@ -8,7 +8,7 @@ interface RefreshResult {
 }
 
 const baseQuery = fetchBaseQuery({
-	baseUrl: "http://localhost:3500",
+	baseUrl: import.meta.env.VITE_BASE_URL,
 	credentials: "include",
 	prepareHeaders: (headers, { getState }) => {
 		const token = (getState() as RootState).auth.token;
@@ -25,7 +25,7 @@ const baseQuery = fetchBaseQuery({
 // and retries the original request with the new token if necessary.
 
 const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
-	// console.log(args) // request url, method, body
+	// console.log(args); // request url, method, body
 	// console.log(api) // signal, dispatch, getState()
 	// console.log(extraOptions) //custom like {shout: true}
 

@@ -2,11 +2,10 @@
 	"name": "server",
 	"version": "1.0.0",
 	"description": "",
-	"main": "server.ts",
+	"main": "app.ts",
 	"scripts": {
-		"start": "node server",
-		"dev": "nodemon server",
-		"lint": "eslint src/**/*.ts"
+		"start": "node app",
+		"dev": "nodemon app"
 	},
 	"keywords": [],
 	"author": "",

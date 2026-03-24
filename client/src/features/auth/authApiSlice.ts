@@ -1,9 +1,14 @@
 import { apiSlice } from "../api/apiSlice";
-import { logOut, setCredentials } from "./authSlice";
+import { logOut, setCredentials } from "./authSlice"; // importing action creators
 
 interface Credentials {
 	username: string;
 	password: string;
+}
+
+interface RegisterResponse {
+	accessToken: string;
+	message: string;
 }
 
 interface LoginResponse {
@@ -16,8 +21,16 @@ interface RefreshResponse {
 
 export const authApiSlice = apiSlice.injectEndpoints({
 	endpoints: (builder) => ({
-		login: builder.mutation<LoginResponse, Credentials>({
+		register: builder.mutation<RegisterResponse, Credentials>({
 			// <response data type, type of arg>
+			query: (credentials) => ({
+				url: "/auth/register",
+				method: "POST",
+				body: credentials,
+			}),
+		}),
+
+		login: builder.mutation<LoginResponse, Credentials>({
 			query: (credentials) => ({
 				url: "/auth",
 				method: "POST",
@@ -52,14 +65,20 @@ export const authApiSlice = apiSlice.injectEndpoints({
 			async onQueryStarted(arg, { dispatch, queryFulfilled }) {
 				try {
 					const { data } = await queryFulfilled;
-					dispatch(setCredentials({ accessToken: data.accessToken }));
+					// console.log(data);
+					const { accessToken } = data;
+					dispatch(setCredentials({ accessToken }));
 				} catch (err) {
-					console.error(err);
+					console.log(err);
 				}
 			},
 		}),
 	}),
 });
 
-export const { useLoginMutation, useSendLogoutMutation, useRefreshMutation } =
-	authApiSlice;
+export const {
+	useRegisterMutation,
+	useLoginMutation,
+	useSendLogoutMutation,
+	useRefreshMutation,
+} = authApiSlice;

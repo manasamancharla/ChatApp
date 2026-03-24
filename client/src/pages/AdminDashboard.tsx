@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useSendLogoutMutation } from "../features/auth/authApiSlice";
 import useAuth from "../hooks/useAuth";
 
-const Dashboard = () => {
+const AdminDashboard = () => {
 	const { username, status } = useAuth();
 	const navigate = useNavigate();
 
@@ -20,10 +20,9 @@ const Dashboard = () => {
 
 	return (
 		<>
-			<h1>Dashboard</h1>
+			<h1>Admin Dashboard</h1>
 			<p>{isLoading}</p>
 			<p>Username: {username}</p>
-			<p>Role: {status}</p>
 
 			<button title="Logout" onClick={handleLogout}>
 				Logout
@@ -32,4 +31,4 @@ const Dashboard = () => {
 	);
 };
 
-export default Dashboard;
+export default AdminDashboard;
